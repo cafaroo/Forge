@@ -1,0 +1,24 @@
+services:
+  postgres:
+    restart: unless-stopped
+
+  redis:
+    restart: unless-stopped
+
+  api:
+    restart: unless-stopped
+    ports: !override []
+    environment:
+      FORGE_TRUSTED_HOSTS: ${FORGE_TRUSTED_HOSTS:?set trusted API hosts}
+      FORGE_CORS_ORIGINS: ${FORGE_CORS_ORIGINS:?set console origin}
+      FORGE_MCP_OAUTH_ENABLED: "false"
+
+  worker:
+    restart: unless-stopped
+    environment:
+      FORGE_TRUSTED_HOSTS: ${FORGE_TRUSTED_HOSTS:?set trusted API hosts}
+
+  web:
+    restart: unless-stopped
+    ports: !override
+      - "${FORGE_BIND_IP:?set private bind IP}:${FORGE_WEB_PORT:-3000}:3000"
