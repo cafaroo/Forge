@@ -29,17 +29,24 @@ for service in api worker web; do
 done
 "${compose[@]}" up -d --no-build --remove-orphans
 
+stable_rounds=0
 for attempt in $(seq 1 60); do
   api_id=$("${compose[@]}" ps -q api)
   worker_id=$("${compose[@]}" ps -q worker)
   if [[ -n "$api_id" && -n "$worker_id" ]] \
       && [[ $(docker inspect --format '{{.State.Health.Status}}' "$api_id") == healthy ]] \
       && [[ $(docker inspect --format '{{.State.Running}}' "$worker_id") == true ]] \
+      && [[ $(docker inspect --format '{{.RestartCount}}' "$worker_id") == 0 ]] \
       && "${compose[@]}" exec -T web wget -q -O /dev/null http://127.0.0.1:3000/; then
-    mkdir -p /var/lib/forge-prod
-    printf '%s %s\n' "$release" "$commit" > /var/lib/forge-prod/release
-    echo "Forge release $release is healthy ($commit)"
-    exit 0
+    stable_rounds=$((stable_rounds + 1))
+    if (( stable_rounds >= 6 )); then
+      mkdir -p /var/lib/forge-prod
+      printf '%s %s\n' "$release" "$commit" > /var/lib/forge-prod/release
+      echo "Forge release $release is healthy ($commit)"
+      exit 0
+    fi
+  else
+    stable_rounds=0
   fi
   sleep 5
 done

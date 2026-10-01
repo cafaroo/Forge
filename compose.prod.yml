@@ -17,6 +17,9 @@ services:
     restart: unless-stopped
     environment:
       FORGE_TRUSTED_HOSTS: ${FORGE_TRUSTED_HOSTS:?set trusted API hosts}
+      FORGE_CORS_ORIGINS: ${FORGE_CORS_ORIGINS:?set console origin}
+      FORGE_PUBLIC_BASE_URL: ${FORGE_PUBLIC_BASE_URL:?set HTTPS API URL}
+      FORGE_PUBLIC_CONSOLE_URL: ${FORGE_PUBLIC_CONSOLE_URL:?set HTTPS console URL}
 
   web:
     restart: unless-stopped
