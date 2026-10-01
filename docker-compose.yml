@@ -71,7 +71,7 @@ services:
       FORGE_BOOTSTRAP_ADMIN_PASSWORD: ${FORGE_BOOTSTRAP_ADMIN_PASSWORD:?set a real admin password}
       FORGE_PUBLIC_BASE_URL: ${FORGE_PUBLIC_BASE_URL:-http://localhost:8000}
       FORGE_PUBLIC_CONSOLE_URL: ${FORGE_PUBLIC_CONSOLE_URL:-http://localhost:3000}
-      FORGE_CORS_ORIGINS: '["http://localhost:3000"]'
+      FORGE_CORS_ORIGINS: '${FORGE_CORS_ORIGINS:-["http://localhost:3000"]}'
       # Expose the MCP OAuth 2.1 authorization server so MCP clients can authenticate a user by
       # logging in (in addition to API keys / personal access tokens). Uses FORGE_PUBLIC_BASE_URL
       # for its discovery + redirect URLs. SECURITY: the consent/login screen is intentionally
@@ -114,7 +114,7 @@ services:
       # stored in Postgres undecryptable. (Vectors now live in Postgres via pgvector, not here.)
       - forge-data:/app/.data
     ports:
-      - "8000:8000"
+      - "${FORGE_API_BIND_IP:-0.0.0.0}:${FORGE_API_PORT:-8000}:8000"
 
   # Offloaded run execution (webhook/schedule triggers). Scale freely: `--scale worker=N`.
   worker:
@@ -192,7 +192,7 @@ services:
       api:
         condition: service_healthy
     ports:
-      - "3000:3000"
+      - "${FORGE_WEB_BIND_IP:-0.0.0.0}:${FORGE_WEB_PORT:-3000}:3000"
 
 volumes:
   pgdata:
